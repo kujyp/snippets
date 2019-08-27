@@ -4,4 +4,3 @@
 
 crontab -l | grep -v "~/workspace/documents/dotfiles/crontab_hourly.sh" | crontab -
 crontab -l
-
