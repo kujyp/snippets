@@ -26,4 +26,4 @@ docker -H 10.116.70.141:4243 run --privileged -it --rm ${docker_tag}
 docker run --rm -it -v $PWD:$PWD -w $PWD registry.navercorp.com/mtengine/cuda_python_base:cuda10.0_cudnn7.3_python3.6.7
 python -m venv venv
 source venv/bin/activate
-pip install -r requirements.txt
+pip install -e .
