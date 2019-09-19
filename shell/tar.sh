@@ -39,3 +39,8 @@ fi
 cp /Users/jaeyoung/google_drive/영구공유/공인인증서/yessign.tar ./
 tar xf yessign.tar
 rm -f yessign.tar
+
+
+tar zcvf openmpi-3.0.0-linux.tar.gz openmpi
+tar xf openmpi-3.0.0.tar.gz -C /usr/local
+tar --no-same-owner -xzf cudnn-10.0-linux-x64-v7.3.1.20.tgz -C /usr/local --wildcards {cuda/lib64/libcudnn.so*,cuda/include/*} \
