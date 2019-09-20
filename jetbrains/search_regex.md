@@ -1,0 +1,2 @@
+## jetbrains ide search regex
+- \$\{.*#
