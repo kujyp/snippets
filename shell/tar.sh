@@ -20,9 +20,8 @@ fi
 
 tar xf yessign.tar
 rm -f yessign.tar
-```
-- parallels
-```bash
+
+
 cd /Users/jaeyoung/google_drive/영구공유/공인인증서
 if [[ ! -f yessign.tar ]]; then
     tar cvf yessign.tar yessign
