@@ -15,10 +15,10 @@ function error_msg() {
 
 
 
-if ! command_exists pytest; then
-    error_msg "Install pytest first.
-pip install -r requirements-test.txt"
+if ! command_exists flake8; then
+    error_msg "Install flake8 first.
+pip install flake8==3.6.0"
     exit 1
 fi
 
-PYTHONPATH='.' pytest -vs tests --junitxml test-reports/pytest_junit.xml
+flake8 --exclude='venv*' --ignore=E501

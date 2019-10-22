@@ -1,0 +1,174 @@
+#!/usr/bin/env groovy
+
+
+pipeline {
+    agent {
+        kubernetes {
+            label 'parent'
+            defaultContainer 'jnlp'
+        }
+    }
+    environment {
+        DOCKER_HUB_ACCOUNT = credentials('docker-hub-account')
+        GCLOUD_SERVICE_ACCOUNT_FILE = credentials('gcloud-service-account-file')
+    }
+
+    stages {
+        stage('lint and test') {
+            parallel {
+                stage('lint') {
+                    agent {
+                        kubernetes {
+                            label 'python-lint'
+                            yaml """
+spec:
+  serviceAccountName: cd-jenkins
+  containers:
+  - name: python
+    image: python:3.7.5
+    command:
+    - cat
+    tty: true
+"""
+                        }
+                    }
+
+                    steps {
+                        container('python') {
+                            script {
+                                sh """
+                                    pip install flake8==3.6.0
+                                    python -V
+                                    pip freeze
+
+                                    tools/ci/lint.sh
+                                """
+                            }
+                        }
+                    }
+                }
+
+                stage('pytest') {
+                    agent {
+                        kubernetes {
+                            label 'python-pytest'
+                            yaml """
+spec:
+  serviceAccountName: cd-jenkins
+  containers:
+  - name: python
+    image: python:3.7.5
+    command:
+    - cat
+    tty: true
+"""
+                        }
+                    }
+
+                    steps {
+                        container('python') {
+                            script {
+                                sh """
+                                    pip install -r requirements.txt
+                                    pip install -r requirements-test.txt
+                                    python -V
+                                    pip freeze
+
+                                    tools/ci/pytest.sh
+                                """
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Build and push image with Container Builder') {
+            agent {
+                kubernetes {
+                    label 'nested-pod'
+                    defaultContainer 'jnlp'
+                    yaml """
+spec:
+  serviceAccountName: cd-jenkins
+  containers:
+  - name: docker
+    image: docker
+    command:
+    - cat
+    tty: true
+    volumeMounts:
+    - name: dockersock
+      mountPath: /var/run/docker.sock
+  volumes:
+  - name: dockersock
+    hostPath:
+      path: /var/run/docker.sock
+"""
+                }
+            }
+
+            steps {
+                container('docker') {
+                    script {
+                        sh "apk add git"
+                        sh "apk add bash"
+
+                        def git_commit_short = sh (
+                            script: 'git rev-parse --short=8 HEAD',
+                            returnStdout: true
+                        )
+
+                        sh """
+                            docker login \
+                                -u ${DOCKER_HUB_ACCOUNT_USR} \
+                                -p ${DOCKER_HUB_ACCOUNT_PSW}
+
+                            ./tools/docker_push.sh --tag $git_commit_short
+                            ./tools/docker_push.sh --tag latest
+                        """
+                    }
+                }
+            }
+        }
+
+        stage('Deploy') {
+            agent {
+                kubernetes {
+                    label 'nested-pod'
+                    defaultContainer 'jnlp'
+                    yaml """
+spec:
+  serviceAccountName: cd-jenkins
+  containers:
+  - name: kubectl
+    image: gcr.io/cloud-builders/kubectl
+    command:
+    - cat
+    tty: true
+"""
+                }
+            }
+
+            when { branch 'master' }
+            steps {
+                container('kubectl') {
+                    script {
+                        sh "apt-get install -y git"
+                        def git_commit_short = sh (
+                            script: 'git rev-parse --short=8 HEAD',
+                            returnStdout: true
+                        ).trim()
+
+                        sh """
+                            gcloud auth activate-service-account --key-file ${GCLOUD_SERVICE_ACCOUNT_FILE}
+                            gcloud container clusters get-credentials musicalibur-cluster-1 --zone asia-northeast1-a --project polished-scope-254916
+                            sed -i "s/<VERSION>/$git_commit_short/" tools/gcloud/k8s/deployments/musicalibur-webdemo.yaml
+                            kubectl apply -f tools/gcloud/k8s/deployments/musicalibur-webdemo.yaml
+                        """
+                    }
+                }
+            }
+        }
+    }
+}
