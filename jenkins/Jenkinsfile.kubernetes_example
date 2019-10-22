@@ -6,6 +6,28 @@ pipeline {
         kubernetes {
             label 'parent'
             defaultContainer 'jnlp'
+            yaml """
+spec:
+  serviceAccountName: cd-jenkins
+  containers:
+  - name: kubectl
+    image: gcr.io/cloud-builders/kubectl
+    command:
+    - cat
+    tty: true
+  - name: docker
+    image: docker
+    command:
+    - cat
+    tty: true
+    volumeMounts:
+    - name: dockersock
+      mountPath: /var/run/docker.sock
+  volumes:
+  - name: dockersock
+    hostPath:
+      path: /var/run/docker.sock
+"""
         }
     }
     environment {
@@ -84,30 +106,6 @@ spec:
         }
 
         stage('Build and push image with Container Builder') {
-            agent {
-                kubernetes {
-                    label 'nested-pod'
-                    defaultContainer 'jnlp'
-                    yaml """
-spec:
-  serviceAccountName: cd-jenkins
-  containers:
-  - name: docker
-    image: docker
-    command:
-    - cat
-    tty: true
-    volumeMounts:
-    - name: dockersock
-      mountPath: /var/run/docker.sock
-  volumes:
-  - name: dockersock
-    hostPath:
-      path: /var/run/docker.sock
-"""
-                }
-            }
-
             steps {
                 container('docker') {
                     script {
@@ -133,23 +131,6 @@ spec:
         }
 
         stage('Deploy') {
-            agent {
-                kubernetes {
-                    label 'nested-pod'
-                    defaultContainer 'jnlp'
-                    yaml """
-spec:
-  serviceAccountName: cd-jenkins
-  containers:
-  - name: kubectl
-    image: gcr.io/cloud-builders/kubectl
-    command:
-    - cat
-    tty: true
-"""
-                }
-            }
-
             when { branch 'master' }
             steps {
                 container('kubectl') {
