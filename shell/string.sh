@@ -58,3 +58,12 @@ test -z "${answer#[yYnN]}" && echo true
 
 ## Remove white space
 awk '{$1=$1};1'
+
+
+echo "Ubuntu a" | cut -f1 -d ' '
+echo "Ubuntu" | cut -f1 -d ' '
+echo "Centos Linux" | cut -f1 -d ' '
+echo "Centos" | cut -f1 -d ' '
+
+
+$(echo MacOS | tr '[:upper:]' '[:lower:]')
