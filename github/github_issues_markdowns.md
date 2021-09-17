@@ -1,10 +1,10 @@
 ### github_issues_markdowns
 - details
 ```markdown
-<details><summary>abc</summary>
+<details><summary>ab details</summary>
 <p>
 
-kjldfakdjsfalskdf
+dkfj
 
 </p>
 </details>
