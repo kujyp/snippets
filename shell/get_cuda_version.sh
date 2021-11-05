@@ -9,6 +9,10 @@ nvcc --version | grep "Cuda compilation" | awk '{ print $6 }'
 nvcc --version | grep "Cuda compilation" | awk '{ print $6 }' | tr -d [:alpha:]
 #> 10.0.130
 
+locate nccl| grep "libnccl.so" | tail -n1 | sed -r 's/^.*\.so\.//'
+ldconfig -v | grep "libnccl.so" | tail -n1 | sed -r 's/^.*\.so\.//'
+
+
 CUDA_VERSION_MAJOR=8
 CUDA_VERSION_MINOR=0
 CUDA_VERSION_PATCH=61
