@@ -9,4 +9,4 @@ dkfj
 </p>
 </details>
 ```
-검색어: details, summary, hide
+검색어: details, summary, hide, foldable, fold
