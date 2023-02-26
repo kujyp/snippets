@@ -67,3 +67,62 @@ echo "Centos" | cut -f1 -d ' '
 
 
 $(echo MacOS | tr '[:upper:]' '[:lower:]')
+
+
+unset abc
+if [[ -z  $abc ]]
+then
+  echo "-z is true"
+else
+  echo "-z is false"
+fi
+
+abc=""
+if [[ -z $abc ]]
+then
+  echo "-z is true"
+else
+  echo "-z is false"
+fi
+
+abc=" "
+if [[ -z $abc ]]
+then
+  echo "-z is true"
+else
+  echo "-z is false"
+fi
+
+
+unset abc
+if [[ -z  $abc ]]
+then
+  echo "-z is true"
+else
+  echo "-z is false"
+fi
+
+abc=""
+if [[ -z $abc ]]
+then
+  echo "-z is true"
+else
+  echo "-z is false"
+fi
+
+abc=" "
+if [[ -z $abc ]]
+then
+  echo "-z is true"
+else
+  echo "-z is false"
+fi
+
+
+abc=" "
+if [[ -z "$abc" ]]
+then
+  echo "-z is true"
+else
+  echo "-z is false"
+fi
