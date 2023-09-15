@@ -4,7 +4,7 @@ tar_filename=results_${MTML_RESOURCE_NAME}.tar
 tar cvf ${tar_filename} *
 
 
-cd /Users/jaeyoung/google_drive/영구공유/공인인증서
+cd /Users/jaeyoung/Library/CloudStorage/GoogleDrive-pjo901018@gmail.com/My\ Drive/영구공유/공인인증서
 if [[ ! -f yessign.tar ]]; then
     tar cvf yessign.tar yessign
 fi
